@@ -1,0 +1,10 @@
+POST http://localhost:3200/product
+Content-Type: application/json
+
+{
+  "name": "fiber"
+}
+
+###
+GET http://localhost:3200/product/123s
+Content-Type: application/json
