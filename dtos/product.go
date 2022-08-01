@@ -6,9 +6,5 @@ type Product struct {
 }
 
 type ProductDto struct {
-	Name string `json:"name"`
-}
-
-type ProductParams struct {
-	ID string `params:"id"`
+	Name string `json:"name" validate:"required"`
 }

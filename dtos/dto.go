@@ -9,3 +9,8 @@ var OK = &Ok{
 	Code:    "ok",
 	Message: "successfully",
 }
+
+type Params struct {
+	ID   string `params:"id"`
+	Name string `params:"name"`
+}

@@ -4,6 +4,7 @@ import (
 	"fg/dtos"
 	"fg/services"
 	"fg/stores"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,8 +20,11 @@ func NewProduct(f *fiber.App, dbc any) {
 	p := product{serviceProduct: serviceProduct}
 
 	g := f.Group("/product")
+	g.Get("/:id/:name", NewHandleParamsParser(p.FindByIDWithProduct))
 	g.Get("/:id", NewHandleParamsParser(p.FindByID))
 	g.Post("/", NewHandleBodyParser(p.Create))
+	g.Put("/:id", NewHandleParamsWithBodyParser(p.UpdateByID))
+	g.Delete("/:id", NewHandleParamsParser(p.DeleteByID))
 	//g.Post("/", NewHandleBodyParser[dtos.ProductDto, *dtos.Ok](p.Create))
 }
 
@@ -33,7 +37,7 @@ func (p *product) FindALL() ([]*dtos.Product, error) {
 	return products, nil
 }
 
-func (p *product) FindByID(req dtos.ProductParams) (*dtos.Product, error) {
+func (p *product) FindByID(req dtos.Params) (*dtos.Product, error) {
 	res, err := p.serviceProduct.FindByID(req.ID)
 	if err != nil {
 		return nil, err
@@ -42,10 +46,25 @@ func (p *product) FindByID(req dtos.ProductParams) (*dtos.Product, error) {
 	return res, nil
 }
 
+func (p *product) FindByIDWithProduct(req dtos.Params) (*dtos.Product, error) {
+	fmt.Println(req)
+	return &dtos.Product{}, nil
+}
+
 func (p *product) Create(req dtos.ProductDto) (*dtos.Ok, error) {
 	if err := p.serviceProduct.Create(req); err != nil {
 		return nil, err
 	}
 
+	return dtos.OK, nil
+}
+
+func (p *product) UpdateByID(id dtos.Params, req dtos.ProductDto) (*dtos.Ok, error) {
+	fmt.Println(id, req)
+	return dtos.OK, nil
+}
+
+func (p *product) DeleteByID(req dtos.Params) (*dtos.Ok, error) {
+	fmt.Println(req)
 	return dtos.OK, nil
 }
