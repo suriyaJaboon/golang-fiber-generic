@@ -1,10 +1,14 @@
-POST http://localhost:3200/product
+POST http://localhost:3200/api/v1/product
 Content-Type: application/json
 Accept: application/json
 
 {
   "name": "fiber"
 }
+
+###
+GET http://localhost:3200/api/v1/product
+Accept: application/json
 
 ###
 GET http://localhost:3200/product/123s
@@ -24,5 +28,5 @@ Accept: application/json
 }
 
 ###
-DELETE http://localhost:3200/product/123s
+DELETE http://localhost:3200/api/v1/product/62e7f140c4d44f437aeb552b
 Accept: application/json

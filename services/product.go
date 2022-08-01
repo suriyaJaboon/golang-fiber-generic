@@ -3,50 +3,79 @@ package services
 import (
 	"fg/dtos"
 	"fg/stores"
+	"time"
+
+	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Product interface {
-	Create(dto dtos.ProductDto) error
 	FindALL() ([]*dtos.Product, error)
-	FindByID(id string) (*dtos.Product, error)
+	FindByID(id primitive.ObjectID) (*dtos.Product, error)
+	Create(dto dtos.ProductDto) error
+	Update(id primitive.ObjectID, dto dtos.ProductDto) error
+	Delete(id primitive.ObjectID) error
 }
+
+type StoreProduct stores.Store[dtos.Product]
 
 type product struct {
-	storeProduct stores.Product
+	store StoreProduct
 }
 
-func NewProduct(storeProduct stores.Product) Product {
-	return &product{storeProduct: storeProduct}
+func NewProduct(store StoreProduct) Product {
+	return &product{store: store}
 }
 
 func (p *product) FindALL() ([]*dtos.Product, error) {
-	var prods = []*dtos.Product{
-		{
-			UUID: "uuid-new-string-0",
-			Name: "golang",
-		}, {
-			UUID: "uuid-new-string-1",
-			Name: "fiber",
-		},
-	}
-
-	return prods, nil
+	return p.store.FindALL()
 }
 
-func (p *product) FindByID(id string) (*dtos.Product, error) {
-	var prod = dtos.Product{
-		UUID: id,
-		Name: "golang",
+func (p *product) FindByID(id primitive.ObjectID) (*dtos.Product, error) {
+	prod, err := p.store.FindByID(id)
+	if err != nil {
+		return nil, ErrByID(err)
 	}
 
-	return &prod, nil
+	return prod, nil
 }
 
 func (p *product) Create(dto dtos.ProductDto) error {
 	var prod = dtos.Product{
-		UUID: "uuid-new-string",
-		Name: dto.Name,
+		ID:        primitive.NewObjectID(),
+		UUID:      uuid.New().String(),
+		Name:      dto.Name,
+		CreatedAt: time.Now(),
 	}
 
-	return p.storeProduct.Save(prod)
+	return p.store.Create(prod)
+}
+
+func (p *product) Update(id primitive.ObjectID, dto dtos.ProductDto) error {
+	prod, err := p.store.FindByID(id)
+	if err != nil {
+		return ErrByID(err)
+	}
+
+	prod.Name = dto.Name
+	prod.UpdatedAt = time.Now()
+
+	if err = p.store.Update(id, *prod); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *product) Delete(id primitive.ObjectID) error {
+	_, err := p.store.FindByID(id)
+	if err != nil {
+		return ErrByID(err)
+	}
+
+	if err = p.store.Delete(id); err != nil {
+		return err
+	}
+
+	return nil
 }

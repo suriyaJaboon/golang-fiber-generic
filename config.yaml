@@ -1,0 +1,7 @@
+service: 'fb'
+mongo:
+  uri:
+  host: '127.0.0.1:27017'
+  username:
+  password:
+  database: 'fg'
