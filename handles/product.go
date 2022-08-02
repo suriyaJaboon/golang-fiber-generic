@@ -41,7 +41,7 @@ func (p *product) FindALL() ([]*dtos.Product, error) {
 func (p *product) FindByID(req dtos.Params) (*dtos.Product, error) {
 	idx, err := primitive.ObjectIDFromHex(req.ID)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidID
 	}
 
 	res, err := p.serviceProduct.FindByID(idx)
@@ -67,7 +67,7 @@ func (p *product) Create(req dtos.ProductDto) (*dtos.Ok, error) {
 func (p *product) UpdateByID(id dtos.Params, req dtos.ProductDto) (*dtos.Ok, error) {
 	idx, err := primitive.ObjectIDFromHex(id.ID)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidID
 	}
 
 	if err = p.serviceProduct.Update(idx, req); err != nil {
@@ -80,7 +80,7 @@ func (p *product) UpdateByID(id dtos.Params, req dtos.ProductDto) (*dtos.Ok, err
 func (p *product) DeleteByID(req dtos.Params) (*dtos.Ok, error) {
 	idx, err := primitive.ObjectIDFromHex(req.ID)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidID
 	}
 
 	if err = p.serviceProduct.Delete(idx); err != nil {

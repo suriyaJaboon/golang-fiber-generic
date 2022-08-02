@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fg/dtos"
+	"fg/services"
 	"fg/x"
 	"log"
 	"strconv"
@@ -15,8 +16,14 @@ import (
 
 const (
 	NOTFOUND     = x.NOTFOUND
+	FORMATTING   = x.FORMATTING
 	VALIDATION   = x.VALIDATION
 	UNAUTHORIZED = x.UNAUTHORIZED
+)
+
+var (
+	ErrInvalid   = services.ErrInvalid
+	ErrInvalidID = services.ErrInvalidFormat
 )
 
 type Context struct {
@@ -52,7 +59,7 @@ func ErrValidator(errs []*ErrorValidation) error {
 }
 
 func ErrBodyParser() error {
-	return &dtos.Error{Code: fiber.StatusNotAcceptable, Opt: VALIDATION, Err: errors.New("BodyParser")}
+	return &dtos.APIError{Code: fiber.StatusNotAcceptable, Opt: VALIDATION, Err: errors.New("BodyParser")}
 }
 
 var (
@@ -92,7 +99,7 @@ var (
 			res.Message = e.Message
 		}
 
-		if e, ok := err.(*dtos.Error); ok {
+		if e, ok := err.(*dtos.APIError); ok {
 			if e.Code > 0 {
 				code = e.Code
 				if e.Opt == NOTFOUND {
@@ -102,6 +109,29 @@ var (
 				if e.Opt == UNAUTHORIZED {
 					code = fiber.StatusUnauthorized
 				}
+			}
+
+			res.Code = e.Opt
+			res.Message = e.Err.Error()
+
+			if e.Err == mongo.ErrNoDocuments {
+				res.Message = fiber.ErrInternalServerError.Message
+			}
+			if e.Opt == UNAUTHORIZED {
+				res.Message = fiber.ErrUnauthorized.Message
+			}
+		}
+
+		if e, ok := err.(*dtos.Error); ok {
+			switch e.Opt {
+			case NOTFOUND:
+				code = fiber.StatusNotFound
+			case FORMATTING:
+				code = fiber.StatusNotAcceptable
+			case UNAUTHORIZED:
+				code = fiber.StatusUnauthorized
+			default:
+				code = fiber.StatusInternalServerError
 			}
 
 			res.Code = e.Opt

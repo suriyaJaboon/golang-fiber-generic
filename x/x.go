@@ -1,6 +1,7 @@
 package x
 
 const (
+	SERVICE      = "SERVICE"
 	SERVER       = "SERVER"
 	NOTFOUND     = "NOTFOUND"
 	VALIDATION   = "VALIDATION"

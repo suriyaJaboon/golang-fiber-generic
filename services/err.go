@@ -3,24 +3,28 @@ package services
 import (
 	"fg/dtos"
 	"fg/x"
-	"go.mongodb.org/mongo-driver/mongo"
-	"net/http"
 	"os"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
-	SERVER   = x.SERVER
-	NOTFOUND = x.NOTFOUND
+	SERVICE    = x.SERVICE
+	SERVER     = x.SERVER
+	NOTFOUND   = x.NOTFOUND
+	FORMATTING = x.FORMATTING
 )
 
 var (
-	ErrInvalid = errInvalid()
+	ErrInvalid         = errInvalid()
+	ErrInvalidFormat   = errInvalidFormat()
+	ErrInvalidNotFound = errInvalidNotFound()
 )
 
 type Error = dtos.Error
 
 func ErrServer(err error) error {
-	return &Error{Code: http.StatusInternalServerError, Opt: SERVER, Err: err}
+	return &Error{Opt: SERVER, Err: err}
 }
 
 func ErrByID(err error) error {
@@ -32,5 +36,13 @@ func ErrByID(err error) error {
 }
 
 func errInvalid() error {
-	return &Error{Code: http.StatusNotFound, Opt: NOTFOUND, Err: os.ErrInvalid}
+	return &Error{Opt: SERVICE, Err: os.ErrInvalid}
+}
+
+func errInvalidFormat() error {
+	return &Error{Opt: FORMATTING, Err: os.ErrInvalid}
+}
+
+func errInvalidNotFound() error {
+	return &Error{Opt: NOTFOUND, Err: os.ErrInvalid}
 }
